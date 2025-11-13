@@ -19,21 +19,33 @@ namespace modem
         public Form1()
         {
             InitializeComponent();
+            //Podpięcie event handlera dla odbioru danyc
+            serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialPort_DataReceived);
         }
 
+        //Komenda do wyslania
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            textBox1.Text += "1";
-        }
-
+        //Numer wpisywany do textBox1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        //Usuniecie ostatniego znaku w textBox1
+        private void button17_Click(object sender, EventArgs e)
+        {
+            if (textBox1.Text.Length > 0)
+                textBox1.Text = textBox1.Text.Substring(0, textBox1.Text.Length - 1);
+        }
+
+        //Klawiatura numeryczna button1-10
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Text += "1";
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -81,17 +93,13 @@ namespace modem
             textBox1.Text += "0";
         }
 
+        //Otwarcie portu szeregowego
         private void button15_Click(object sender, EventArgs e)
         {
             serialPort.Open();
         }
 
-        private void button17_Click(object sender, EventArgs e)
-        {
-            if (textBox1.Text.Length > 0)
-                textBox1.Text = textBox1.Text.Substring(0, textBox1.Text.Length - 1);
-        }
-
+        //Zamknięcie portu szeregowego
         private void button16_Click(object sender, EventArgs e)
         {
             serialPort.Close();
@@ -103,6 +111,7 @@ namespace modem
             serialPort.Write(comand);
         }
 
+        //Zakończenie calla
         private void button12_Click(object sender, EventArgs e)
         {
             Thread.Sleep(1000);
@@ -111,14 +120,33 @@ namespace modem
             serialPort.Write("ATH\r");
         }
 
+        //Akceptacja calla
         private void button13_Click(object sender, EventArgs e)
         {
             serialPort.Write("ata\r");
         }
 
+        //Wysłanie komendy z textBox2 do numeru w textBox1
         private void button14_Click(object sender, EventArgs e)
         {
             serialPort.Write(textBox2.Text + "\r");
+        }
+
+
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            SerialPort sp = (SerialPort)sender;
+            string receivedData = sp.ReadExisting();
+
+            // Użycie Invoke do bezpiecznej aktualizacji kontrolki z wątku UI
+            this.Invoke(new MethodInvoker(() =>
+            {
+                richTextBox1.AppendText(receivedData);
+            }));
+        }
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
